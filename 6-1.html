@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>A little love from Maru — surprise for my girl</title>
+<style>
+  :root{
+    --bg:#fff8fb;
+    --card:#fff;
+    --accent:#f5a8c2; /* soft pink */
+    --accent-dark:#e67aa6;
+    --muted:#9b7a89;
+    --shadow: 0 8px 30px rgba(214,150,170,0.12);
+    --radius:18px;
+    --maxw:980px;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background: linear-gradient(180deg, #fff8fb 0%, #fff4f8 100%);
+    color:#3c2b33;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.5;
+    padding:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:var(--maxw);
+    margin: 12px;
+  }
+
+  header.brand{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .brand .title{
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:0.2px;
+  }
+  .brand .subtitle{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px;
+  }
+
+  /* Pages: we'll show/hide these sections */
+  section.page{ display:none; }
+
+  /* Centered small content for password & timer */
+  .center{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    text-align:center;
+    padding:30px;
+  }
+
+  input[type="password"], input[type="text"], input[type="datetime-local"]{
+    width:100%;
+    max-width:420px;
+    padding:12px 14px;
+    border-radius:12px;
+    border:1px solid #f0d9e2;
+    background:#fff;
+    outline:none;
+    font-size:16px;
+    box-shadow:inset 0 1px 0 rgba(0,0,0,0.02);
+  }
+  button.btn{
+    padding:10px 18px;
+    border-radius:12px;
+    border:0;
+    cursor:pointer;
+    background:linear-gradient(180deg,var(--accent) , var(--accent-dark));
+    color:white;
+    font-weight:600;
+    box-shadow: 0 6px 18px rgba(230,122,150,0.18);
+  }
+  button.ghost{
+    background:transparent;
+    border:1px solid #f3d6de;
+    color:var(--accent-dark);
+  }
+
+  .hint{
+    font-size:14px;
+    color:var(--muted);
+    background:linear-gradient(90deg,#fff0f5, #fff8fb);
+    padding:12px 14px;
+    border-radius:12px;
+    border:1px dashed #f4c7d8;
+    max-width:520px;
+  }
+
+  /* Timer style */
+  .timer{
+    font-size:28px;
+    font-weight:700;
+    color:var(--accent-dark);
+    margin-top:6px;
+  }
+
+  /* Music heart button */
+  .music-btn{
+    position:fixed;
+    right:16px;
+    bottom:18px;
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+    cursor:pointer;
+    box-shadow: 0 8px 24px rgba(220,140,160,0.18);
+    background:linear-gradient(180deg,#fff,#fff);
+    transition:transform .18s ease;
+  }
+  .music-btn:active{ transform:scale(.96) }
+  .music-btn .heart{
+    font-size:22px;
+    transform-origin:center;
+  }
+  .music-btn.on{
+    background:linear-gradient(180deg,var(--accent) , var(--accent-dark));
+    color:white;
+  }
+
+  /* Main content area — big note */
+  .note{
+    padding:28px;
+    max-height:65vh;
+    overflow:auto;
+    border-radius:14px;
+    background:linear-gradient(180deg,#fff,#fff4f8);
+    border:1px solid #f4d6e2;
+  }
+  .note h1{ margin:0 0 10px 0; font-size:26px; color:var(--accent-dark) }
+  .note p{ font-size:16px; color:#4a313c; white-space:pre-wrap; }
+
+  /* hearts pop-up container */
+  .hearts-layer{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    top:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:450;
+  }
+  .heart-pop{
+    position:absolute;
+    font-size:22px;
+    transform:translateY(0) scale(0.8);
+    opacity:0.95;
+    animation:rise 2400ms ease-in forwards;
+  }
+  @keyframes rise{
+    0%{ transform:translateY(0) scale(0.6); opacity:1; }
+    40%{ transform:translateY(-30vh) scale(1.0); }
+    100%{ transform:translateY(-120vh) scale(1.35); opacity:0; }
+  }
+
+  /* Gallery */
+  .gallery-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+  .gallery-item{
+    position:relative;
+    overflow:hidden;
+    border-radius:12px;
+    cursor:pointer;
+    border:1px solid #f3dbe2;
+  }
+  .gallery-item img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  .caption{
+    margin-top:8px;
+    font-size:14px;
+    color:var(--muted);
+  }
+
+  /* Lightbox modal */
+  .modal{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.5);
+    z-index:800;
+    padding:18px;
+  }
+  .modal .modal-card{
+    background:white;
+    border-radius:12px;
+    padding:14px;
+    max-width:920px;
+    width:100%;
+    box-shadow:0 18px 40px rgba(0,0,0,0.4);
+    display:flex;
+    gap:12px;
+    flex-direction:column;
+    align-items:center;
+  }
+  .modal img{ max-width:100%; max-height:70vh; border-radius:10px; }
+  .modal .modal-caption{ width:100%; padding:8px 10px; border-radius:8px; border:1px solid #f3d6de; background:#fff; font-size:15px; color:#4b2f3b; }
+
+  /* footer nav for moving through pages */
+  .nav-end{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top:16px;
+  }
+
+  /* responsive */
+  @media(max-width:720px){
+    .note{ max-height:55vh; padding:18px; }
+    .center{ padding:18px; }
+    .brand .title{ font-size:16px }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div>
+      <div class="title">A little love from Maru 💗</div>
+      <div class="subtitle">Only for you, Emu 🙃💗— open when your heart says so.</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:13px;color:var(--muted)">Happy Birthday Eman 💗✨</div>
+    </div>
+  </header>
+
+  <!-- PASSWORD PAGE -->
+  <section id="page-password" class="page card">
+    <div class="center">
+      <div style="font-size:18px;font-weight:700">Welcome my Love ✨💗</div>
+      <div class="hint">Let's Fall in LOVE again 💗🫂</div>
+      <div style="max-width:520px;margin-top:12px">
+        <input id="passInput" type="password" placeholder="hehe👉🏻👈🏻 passward 💗" />
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button id="checkPassBtn" class="btn">Open 💗</button>
+        <button id="hintBtn" class="ghost">Hint</button>
+      </div>
+      <div id="passMsg" style="color:#b23a5a;font-weight:600;margin-top:8px;display:none"></div>
+    </div>
+  </section>
+
+  <!-- TIMER PAGE -->
+  <section id="page-timer" class="page card">
+    <div class="center">
+      <div style="font-size:20px;font-weight:700">Countdown to a very special day 🙃</div>
+      <div id="timerLine" class="timer">-- : -- : -- : --</div>
+      <div style="font-size:14px;color:var(--muted);max-width:520px">
+        I sent this early to make you wait a little — Sowwwwy 👉🏻👈🏻💗
+      </div>
+      <div class="nav-end">
+        <button id="refreshTimer" class="ghost">Refresh</button>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--muted)">You won't be able to open the main note until the timer reaches 
+       - hehe 🤧✨ </div>
+       <p style="margin-top:10px;font-size:13px;color:var(--muted)"> Click Pink Heart 💗 down right corner </p>
+    </div>
+  </section>
+
+  <!-- MAIN PAGE -->
+  <section id="page-main" class="page card">
+   <div style="display:flex;flex-direction:column;gap:18px;">
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="margin:0;color:var(--accent-dark)">Happy Birthday — Our Ethereal Journey ✨ </h3>
+      <div style="font-size:13px;color:var(--muted)">Too long Read it when free 😭♥</div>
+    </div>
+    <div class="note" id="noteArea">
+      <!-- demo content -->
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+      <button id="toGallery" class="btn">My World 🙃</button>
+    </div>
+  </div>
+
+  <!-- your special words box now appears BELOW -->
+  <div style="background:linear-gradient(180deg,#fff,#fff8fb);border-radius:12px;padding:12px;border:1px solid #f5d4df">
+    <div style="font-weight:700;color:var(--accent-dark)">A special note</div>
+    <div style="color:var(--muted);font-size:14px;margin-top:8px">
+      HAPPY BIRTHDAY MY CUTU BABY GIRL 😭💗👉🏻👈🏻
+      Aj to muje ni pata i want hugsssss so many hugsss 😭👀 I am so so so happy 🙃💗. I know you don't like birthdays but Still I want 
+      to make your day soo special ( no douth this is not so good but i think atleast it will bring a smile on your face 🙃💗) and as you know 
+      AP KI SMILE = WHOLE WORLD FOR ME 🙃💞 MY EMU 💗 My EMI 👀 MY EMAN 😭 MY MANI 🙃 MY MOON  ✨ MY BABY 👉🏻👈🏻 MY GIRL ❣️ MY LOVE 😙 MY GOLAB JAMUN 🫂
+      MY GOLU MOLUU 🤍 MY QUEEN 💘 MY CUTU ❤️ MY BESTIE 💞 Or bi itte piyaree name hain ap ka madam g 😭👉🏻👈🏻❣️ IN SHORT YOU ARE MY EVERYTHING 😭🫂
+
+Love, Maru 💗
+
+
+    </div>
+  </div>
+</div>
+
+  </section>
+
+  <!-- GALLERY PAGE -->
+  <section id="page-gallery" class="page card">
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700;font-size:18px;color:var(--accent-dark)">Our Moments — Gallery</div>
+        <div style="font-size:13px;color:var(--muted)">Tap to open — captions below each image</div>
+      </div>
+
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- gallery items inserted by JS -->
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:space-between;margin-top:14px">
+        <button id="backToMain" class="ghost">Back to Note</button>
+        <div style="display:flex;gap:10px">
+          <button id="toEnd" class="btn">Finish & Wish</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- END PAGE -->
+  <section id="page-end" class="page card">
+    <div class="center">
+      <div style="font-size:20px;font-weight:700;color:var(--accent-dark)">Happy Birthday, Emu</div>
+      <div style="max-width:700px;font-size:15px;color:#5b3842;padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff4f8);border:1px solid #f4d6e2">
+        <p style="margin:0 0 8px 0">
+          I hope this little surprise made you smile. You are everything to me and I wish you the happiest birthday. I love you — Maru 💗
+        </p>
+      </div>
+
+      <div style="margin-top:10px">
+        <button id="restartBtn" class="btn">Open again</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- hearts layer (for popups) -->
+<div class="hearts-layer" id="heartsLayer"></div>
+
+<!-- modal for gallery -->
+<div id="modal" class="modal" aria-hidden="true">
+  <div class="modal-card">
+    <img id="modalImg" src="" alt="opened image" />
+    <div id="modalCaption" class="modal-caption"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="closeModal" class="ghost">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- music audio element (user should replace src variable in script below) -->
+<audio id="bgMusic" loop></audio>
+
+<!-- music toggle heart -->
+<div id="musicBtn" class="music-btn" title="Play / Pause music">
+  <div class="heart">💗</div>
+</div>
+
+<script>
+/* =========================
+   USER: CHANGE THESE VALUES
+   =========================
+   - SECRET_PASSWORD: the code she must enter (string)
+   - HINT_TEXT: hint shown when hint button pressed
+   - BIRTHDAY_ISO: the date/time when timer hits zero (ISO format 'YYYY-MM-DDTHH:MM:SS' or just 'YYYY-MM-DD')
+   - NOTE_TEXT: put your long note here (can be multiline using \n\n for paragraphs)
+   - GALLERY_IMAGES: array of {src: 'path-or-url', caption:'caption text'}
+   - MUSIC_SRC: path or URL to your mp3 (relative file if you put the mp3 next to index.html)
+   =========================
+*/
+const SECRET_PASSWORD = "Eternelle 💗";          // <-- change password here
+const HINT_TEXT = "Our every night word jana 😭♥"; // <-- change hint text here
+const BIRTHDAY_ISO = "2025-12-06T09:00:00"; // <-- change to the exact birthday datetime (local) you want
+const NOTE_TEXT = `My dearest Emu,\n\n
+ 💗✨
+ SO, welcome the Queen of the heart 💗🙃 here is a big note (bohot bara ha free time ma parhna 😭💗). 
+This note will help you to know me more closely. I had recorded every feeling, my reactions, and some questions which I can't ask you directly 🙃✨ hope so after reading this, our bond will become stronger 🫂 
+( this is actual me inn reactions ko parh ka ap ko gusa bi ay ga maybe ap sad bi ho jae and piyar to wase hi humsha karti hainn ap issi lia dont ruin your birthday baad ma read karna 🤧🙃💗)
+ And as you know I am suffering issi lia ya web achi ni bani 🤧 I want to add many more things in it ( btw this is the copy past of FINDING HER 👀💞 my diary jo aj tk mane bi reread ni ki 😭😭)
+ jb me apne extreems pa hota then ma write karta 🤧 iss ma kuch bi addition ya subtraction ni ha it is what it is 🙃💗
+ I heard from someone first you fall in love with a perfect person then ap ko unn ki imperfections nazer ane lagti hain if you Falll again then at that time it is called true love 🙃💗
+ I LOVE YOU SO MUCH MISS EMAN AHMAD 😭💗 or Mrs Hashmi 😭😭💗 ( future ) sowwy love you enjoy 🤧❣️
+تلاش 
+مجھے ڈھونڈ رہے ہو؟
+چلو مل کر ڈھونڈے 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Wahhhhh! Wah wah
+Great UMAR HASHMI kia baat ha janab 🤌🏻 apni life to karab thi hi ab ik larki ko apni life ma add kar Orr uss ki bi life karab kar de 🙌🏻
+SHABASH
+Shoutout loser 🙌🏻🫂
+Why! Why! Why! I'm attracting Allah; this interaction is so powerful, Ya Allah, I'm losing my mind. Idk what to do...
+WHY NOOO:
+1st, she had mentioned clearly, "No relationships.”
+2nd, why me, haha, she has many better options other than a dumb shit* like me
+3rd muh dech apna Umar 🤌🏻 no match she is amazing
+4th, she is 100/10 skill full artist, passionate about her future. Stunning chize match Karti doesn't mean she likes you. I'm just a time-pass friend for her
+5th Umar Umar umar, achi lagti ha na to chor de life na karab kar uss ki 
+6th agger dill tor dia mane 🤌🏻🙂 mari khair ha emu ko kush rakhna bss
+WHY YESSS:
+( maybe this is love for the 1st time )
+LOVE 😭😭 muje kia pata me to feelings torne wala ho bhai. Ya kia ho rahaa
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Emu, 🙃 I ask my mama, sister, brothers, and friends (Haris and Shaheer) a question: Do they ever find me possessive 🤧 I got the Answers: no, never, I don’t think so 🙃… But now I am finding myself super possessive 😭😭🤌🏻.  WHYYY!! 😭💗 Ya sbb ap ki galti ha. Ik baat jo maybe me kabhi direct na kaho 👉🏻👈🏻 ( Muje ap ka kisi bi larke sa baat karna hurt karta 😭 ) sowwy but this is the truth 🤧. sowwy sowwy sowwy sowwwyyyyyyyyyyyyyyyyyy I FEEL JEOLOUS “EXTREMELY JEOLOUS” 🙂. But don’t worry, my girl, me kabhi ristrict ni karo ga 🤧💗(Just because I not only trust you, I believe in you 😭🤌🏻🫂) Next then ap ki marzi ap baat kare ya na kare 🤧🙃 ( I will never ever ristrict you in your professional matters)  I don’t wanna lose you 😭😭🤌🏻 (soch ka hi rona aa jata 😭🥺) I want to be your priority EMAN 😭🤌🏻. I want you to share everything 🤌🏻🤧 I LOVE LISTENING TO YOU 😭💗.  ( Ap bolti rahe and me sunte sunte so jao 😭😭😭😭👉🏻👈🏻💗). Mare sa sbb share kare (request 🙃) I mean emu agger mare sa hi koi galti ho jae or ap mare sa naraz ho jae (😭 allah na kare me ap ko kabhi naraz karo 😭🤌🏻) agger mare sa naraz bi ho mare sa baat kare mare sa problem ho mare sa baat kare hum kud solve kar le ga na kisi or ko ku batana ha 🤧 YOU ARE MINE MARE SA BAAT KAREEEEEE 😭🤌🏻💗 ( Allah me ittna demanding ho raha sowwwyyyyy 😭🤌🏻 Bhol jae 🙂✨)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+I am getting late emuuu 😭🤌🏻 agger parcel ka na deliver howa then surprise reh jana 😭🙂💔  ( 1st jewler uncle na 1 din ka keh ka 3 din laga dia 😭) books check (2 or deni thi but wo order ka time ni thaa 😭 and jar to ready tha 🙃💗( jar is so special 🤧💗)  We are meeting tomorrow 🥳💞 yipyyyyyyyyyyyyyyyy!!✨ ( I KNOW not physically but 😭👉🏻👈🏻) Still, I am excited, jana sooooo excited. mane ittne gift dene the stuf toys, chocolates, ice cream, Jumkeee, choriya 😭😭🤌🏻💗 ittni sari books 😭  AND A VERY SPECIAL THING 🤧💗 hehe (surpriseeeeee 👉🏻👈🏻) 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Emu loves peanuts. Her favorite colour is Emerald Green 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+She loves me for my Physical appearance! I am sad, if she loves me just because of my looks, then agger in real life, she started hating me then! biggest Qurie in my mind . No doubt I also love her for her deep eyes, cutest skin, but at the same time, I love her Heart, MInd, her cuteness, Behaviour, and Childishness. I love her completely from Head to toe. Especially, I AM IN LOVE WITH HER SOUL 💗🙃 Hope So She feels at least the same 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Ahh, I CALLED YOU MINE 🫠💗
+You know, I think is one of the toughest decisions I have ever made, or you can say I have no choice because ap thi ap hain or ap hi rahe gi 🤌🏻💗
+I am trapped. Acha, you know why this is a tough decision, because I never claim someone like this. Mara matlb I never called someone mine. 🙃 You know why, because everything belongs to Allah, and how can I claim anything mine!?
+Biggest question in mind. But then, Mane socha Allah sa ap ko apne lia mang lia jae, then maybe I can claim you mine. I did the same 🫠 and Mane ap ko Allah sa Manga ha ab for sure I can claim you mineeeeeeeeeee 💗✨
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Hehe, mari janan 🫠✨💓
+I am still confused why Eman 🙃🤌🏻💗. Me?? It's definitely my luck 😭🤌🏻✨💓
+Look at you, emu, look at you 😭🤌🏻💗 brilliant girl out of my league 🤌🏻😭
+Topper, brilliant student ittni piyari hain 😭💗 high achiever 💝 made everyone proud 🫠 multitelented, so so caring 💕🙃 means perfect 🙌🏻💓 
+It's definitely my luck 🤧💓
+Thank you, Allah, so much 🙃💝
+Bestest gift ever 😭💓
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You know, emu 🙃 I hate myself the most jb muje ap doubt hota 🙂 at that time I literally hate me 🤌🏻 because you proved it by your love ka "YOU KNOW HOW TO BE LOYAL.” 
+You are always right, my girl 💗✨. And now I trust you not only trust you, I believe in you, my jana 🫂. (When I was off from Insta, I secretly checked your Insta account 👉🏻👈🏻 sowwy so sowwy). Emu, I hate myself jb ma douth karta tha ap pa 🥺 I hate that me. How can I!! 🤌🏻 Dumb me! You proved me wrong in every way ✨🫂
+My pretty girl, I love you so much 😭🤌🏻✨
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+I'm not an attention seeker, but your attention 🤌🏻 Allah 😭. I want your attention every single millisecond of my life 😭🤌🏻 (but we live on planet Earth 🙃 ap ki apni life ha it is harsh but reality I'm just a small part of your life 🤧🤌🏻) 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Eman, are we in a relationship? 
+Yes, we are, but not like gf bf, it's something more than that, you don't deserve the word gf, you are a queen. And will be my queen INSHALLAH 💗🥺 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Deserves better 🤌🏻🙃 I still think you deserve better, but now you deserve better me, no one else is possible 😭🤌🏻. Ap muje wasa bana de na jasa, you want to see your man 😭🤌🏻💗LOVE YOU 🫠💗 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━				
+Finger jala li 🤌🏻🙂😭 muje kuch ho gya I really feel pain mari finger 😭🤌🏻 ittne cute sa haat hain 😭😭🤌🏻 ahm 🙂🫂 emu aram sa kaam kia kare 🤧🤌🏻💗
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+I LOOK FOR YOU EVERYWHERE AND I FIND YOU IN EVERYTHING ✨💗
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Am I losing interest? Not in you Jana. Maybe from everything except you, 🤌🏻🫂 YOU, AP, ONLY YOU, MINE AND ONLY MINE 😭🙌🏻 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
+Ahh, dude dude dude!  ( I stalked both of them, that guy Saim and My Moon emu 🙃 ) Next time yaa kaam 2 baje hi karna 😭😭 These tears need to talk to his creator 🥺 “ Ya Allah! kia umar sahi keh raha tha. She is a kid, immature lil soul, or IDK Allah Saim had mentioned in his stories that she left her on 27th Aug wao, isnt it so amazing na, cuz i confessed her on 19th of August What is happening and jb Emu ki profile stalk ki, she is in contact with him till the start of August IDK Allah now it starting looking like a revenge that she want to take from that guy saim. Is she using me? Or is she really a little innocent soul?”
+Ya Allah If she is good for me make her mine completly her mine her heart her soul ya Allah plz make her mine and if she is not good for me make her best for me plz ya Allah plz ( I LOVE ONE OF YOU SERVENT ALLAH I WILL TAKE CARE OF HER PROMISE YA ALLAH MAKE HER MINE PLZ ) I know Allah once she had same feelings for another guy, I know jase wo muje mention karti stories pa pehle waha koi or tha, I know Allah pehle I was not Everything for her someone eles koi or tha pehle she loves someone else not maru, “ I know each and everything “ I know maybe Still she loves Someone Else I KNOW I KNOW I KNOW but stll want her ya ALLAH THERE TEARS CRAVES FOR HER  ( I promise I will take care of your beautiful servent she is QUEEN of my HEART)
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
+🫠 Why am I crying? It's 2 am
+Ahh, Eman, for me, it's you and only you. Maybe there's someone better than you (which is not possible). If there is someone better than you, pir bi every time I'll choose you because jana it's love, not a compilation of choosing best 🤌🏻 I LOVE YOU ALL OF YOUR PREFECTIONS AND IMPREFECTIONS (idc who if there is someone better than you) I JUST LOVE YOU AND ONLY YOU 💗 I LOVE EMAN AHMAD
+But you know why I’m crying 🙃 because I want to ask you, do you accept me with all of my preferences and dislikes 🤧🙃
+DO YOU?
+Because I'm not perfect, I make lots of mistakes sometimes gunah. I'm trying to be perfect, but I can't
+Do you still love me?
+Do you expect me with all of my imperfections?
+DO YOU? 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Another question, Idk why I’m asking this, but Ahh sorry
+ "ap saim ko accept kar le gi jb wo ap ka pass wase hi ay ga jase wo tha jb you love him 🙂" 
+I know I'm cooked, this is all about my nights, just you and things related you (my head started burning again) 
+muje to minahil wali I'd sa ap sa baat karta howa hi ni acha lagg raha tha 🙂 
+You are my peace, but Idk why. I really don't know, Yrr idc about anyone. I was a person who didn't even care about himself. Kisi ki life ma kon ha kia kar raha idc, but in your case, I'm feeling helpless ma jitni bi koshish kar lo still I DO CARE. I DO CARE AP KI LIFE MA KON HA KON THA (AND I found the answer why this is happening to me "koi tujko na muj sa chora le") So madam Eman, I'm madly in love with you and for the 1st time I'm becoming possessive about someone something 🤌🏻💗
+Hehe, plz maru now stop crying 🫂✨ you gotta girl who is only yours 💗 Am I right?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HUGS, HOLDING HANDS, TOUCHING HAIRS, etc I'll love this, but after nikah (INSHALLAH) 💗✨ YOU are a queen, my jan, no one can even see you without your permission. 
+I'll make you mine one day 🫠🫂
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FLIRTING AA GAI MARI BABY GIRL KO, 😭👉🏻👈🏻💗✨🤍 ALLAH KAHA JAOOOOO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\n\nLove, Maru 💗`; 
+const GALLERY_IMAGES = [
+  // Example placeholders: replace "images/..." with your actual image filenames or URLs
+  { src: "1.jpeg", caption: "luckiest day🙃💗" },
+  { src: "2.jpeg", caption: "luckyyy 😭💗" },
+  { src: "3.jpeg", caption: "Real love 😭♡" },
+  { src: "4.jpeg", caption: "This 😭🤌🏻💗" },
+  { src: "6.jpeg", caption: "Who Fall FIRST? 🙃💗 " },
+  { src: "7.jpeg", caption: "The Actual Confession ✨🙃" },
+  { src: "8.jpeg", caption: "my confession 💗🤌🏻" },
+  { src: "9.jpeg", caption: "Amm dill tots🤧😭😭" },
+  { src: "13.jpeg", caption: "me fazol bandaaa" },
+  { src: "10.jpeg", caption: "same time pa ya" },
+
+  { src: "p14.jpeg", caption: "" },
+  { src: "11.jpeg", caption: "Ab to bata de kon ha 👀" },
+  { src: "12.jpeg", caption: "Reallyy 🥺💗" },
+  { src: "13.jpeg", caption: "I amm" },
+  { src: "14.jpeg", caption: "I want you  i love you " },
+  { src: "15.jpeg", caption: "NOTED 😭" },
+  { src: "16.jpeg", caption: "Obsession 🙃❣️" },
+  { src: "17.jpeg", caption: "Do you 👀" },
+  { src: "18.jpeg", caption: "love you 👀" },
+  { src: "19.jpeg", caption: "Ap ki waja sa hi jildi so jata ab 😭🤌🏻💗" },
+  { src: "20.jpeg", caption: "Trust" },
+  { src: "p2.jpeg", caption: "" },
+  { src: "21.jpeg", caption: "" },
+  { src: "22.jpeg", caption: "" },
+
+  { src: "p19.jpeg", caption: "" },
+  { src: "23.jpeg", caption: "" },
+  { src: "24.jpeg", caption: "" },
+  { src: "25.jpeg", caption: "" },
+  { src: "p3.jpeg", caption: "" },
+  { src: "27.jpeg", caption: "" },
+
+  { src: "protection6.jpeg", caption: "" },
+  { src: "28.jpeg", caption: "" },
+  { src: "52.jpeg", caption: "" },
+  { src: "411.jpeg", caption: "" },
+  { src: "Allah.jpeg", caption: "" },
+  { src: "b1.jpeg", caption: "" },
+  { src: "b3.jpeg", caption: "" },
+  { src: "b4.jpeg", caption: "" },
+  { src: "b5.jpeg", caption: "" },
+  { src: "b6.jpeg", caption: "" },
+  { src: "b7.jpeg", caption: "" },
+  { src: "b9.jpeg", caption: "" },
+  { src: "b12.jpeg", caption: "" },
+
+  { src: "p15.jpeg", caption: "" },
+  { src: "b13.jpeg", caption: "" },
+  { src: "b14.jpeg", caption: "" },
+  { src: "b15.jpeg", caption: "" },
+  { src: "b16.jpeg", caption: "" },
+  { src: "b17.jpeg", caption: "" },
+  { src: "b18.jpeg", caption: "" },
+  { src: "b19.jpeg", caption: "" },
+  { src: "b20.jpeg", caption: "" },
+  { src: "trust.jpeg", caption: "YOUR TRUST🫂" },
+  { src: "b21.jpeg", caption: "" },
+  { src: "b22.jpeg", caption: "" },
+  { src: "b23.jpeg", caption: "" },
+  { src: "b24.jpeg", caption: "" },
+  { src: "b25.jpeg", caption: "" },
+  { src: "b41.jpeg", caption: "" },
+  { src: "b432.jpeg", caption: "" },
+  { src: "book.jpeg", caption: "" },
+  { src: "h2.jpeg", caption: "" },
+  { src: "h3.jpeg", caption: "" },
+  { src: "h4.jpeg", caption: "" },
+  { src: "h6.jpeg", caption: "" },
+  { src: "rice.jpeg", caption: "Noted" },
+  { src: "h7.jpeg", caption: "" },
+  { src: "h8.jpeg", caption: "" },
+  { src: "h9.jpeg", caption: "" },
+  { src: "h10.jpeg", caption: "" },
+  { src: "h11.jpeg", caption: "" },
+  { src: "h12.jpeg", caption: "" },
+  { src: "h13.jpeg", caption: "" },
+  { src: "sowwy.jpeg", caption: "" },
+  { src: "h14.jpeg", caption: "" },
+  { src: "h15.jpeg", caption: "" },
+  { src: "h16.jpeg", caption: "" },
+  { src: "h17.jpeg", caption: "" },
+  { src: "h18.jpeg", caption: "" },
+  { src: "h19.jpeg", caption: "" },
+
+  { src: "p25.jpeg", caption: "" },
+  { src: "h20.jpeg", caption: "" },
+  { src: "h21.jpeg", caption: "" },
+  { src: "h22.jpeg", caption: "" },
+  { src: "h25.jpeg", caption: "" },
+  { src: "h26.jpeg", caption: "" },
+  { src: "h27.jpeg", caption: "" },
+  { src: "h28.jpeg", caption: "" },
+  { src: "h29.jpeg", caption: "" },
+  { src: "h30.jpeg", caption: "" },
+  { src: "h31.jpeg", caption: "" },
+
+  { src: "p23.jpeg", caption: "" },
+  { src: "h32.jpeg", caption: "" },
+  { src: "h33.jpeg", caption: "" },
+  { src: "h34.jpeg", caption: "" },
+  { src: "h35.jpeg", caption: "" },
+  { src: "h36.jpeg", caption: "" },
+  { src: "h37.jpeg", caption: "" },
+  { src: "h39.jpeg", caption: "" },
+
+  { src: "p9.jpeg", caption: "" },
+  { src: "h40.jpeg", caption: "" },
+  { src: "h41.jpeg", caption: "" },
+  { src: "h42.jpeg", caption: "" },
+  { src: "h43.jpeg", caption: "" },
+  { src: "h44.jpeg", caption: "" },
+  { src: "h46.jpeg", caption: "" },
+  { src: "h48.jpeg", caption: "" },
+  { src: "h49.jpeg", caption: "" },
+
+  { src: "protection3.jpeg", caption: "" },
+  { src: "h50.jpeg", caption: "" },
+  { src: "h51.jpeg", caption: "" },
+  { src: "h52.jpeg", caption: "" },
+  { src: "h55.jpeg", caption: "" },
+  { src: "h58.jpeg", caption: "" },
+  { src: "h70.jpeg", caption: "" },
+  { src: "h233.jpeg", caption: "" },
+
+  { src: "p54543.jpeg", caption: "" },
+  { src: "h423.jpeg", caption: "" },
+  { src: "h434.jpeg", caption: "" },
+  { src: "h523.jpeg", caption: "" },
+  { src: "h524.jpeg", caption: "" },
+  { src: "h643.jpeg", caption: "" },
+
+  { src: "p11.jpeg", caption: "" },
+  { src: "h934.jpeg", caption: "" },
+  { src: "h4321.jpeg", caption: "" },
+  { src: "h4324.jpeg", caption: "" },
+  { src: "h5232.jpeg", caption: "" },
+
+  { src: "p43.jpeg", caption: "" },
+  { src: "h5243.jpeg", caption: "" },
+  { src: "h5424.jpeg", caption: "" },
+  { src: "h5452.jpeg", caption: "" },
+  { src: "h5634.jpeg", caption: "" },
+
+  { src: "protection2.jpeg", caption: "" },
+  { src: "h6853.jpeg", caption: "" },
+  { src: "h8454.jpeg", caption: "" },
+  { src: "h9324.jpeg", caption: "" },
+
+  { src: "protection1.jpeg", caption: "" },
+  { src: "h43423.jpeg", caption: "" },
+  { src: "h52433.jpeg", caption: "" },
+  { src: "hug1.jpeg", caption: "" },
+  { src: "childish.jpeg", caption: "" },
+    { src: "p8.jpeg", caption: "" },
+  { src: "dress.jpeg", caption: "" },
+  { src: "Dua.jpeg", caption: "" },
+  { src: "everythng.jpeg", caption: "" },
+  { src: "family.jpeg", caption: "I LOVE YOUR FAMILY JUST LIKE MINE 🫂💞" },
+  { src: "favt notification.jpeg", caption: "" },
+
+  { src: "p16.jpeg", caption: "" },
+  { src: "favt place.jpeg", caption: "" },
+  { src: "favt things.jpeg", caption: "" },
+  { src: "fvat heart attack.jpeg", caption: "" },
+  { src: "green.jpeg", caption: "" },
+
+  { src: "p10.jpeg", caption: "" },
+  { src: "gusa.jpeg", caption: "" },
+  { src: "I AM STUCKED.jpeg", caption: "" },
+  { src: "i dont like them.jpeg", caption: "" },
+  { src: "kissing.jpeg", caption: "hyyyyeee 😭" },
+  { src: "love letter.jpeg", caption: "" },
+  { src: "mahad.jpeg", caption: "thank u for doing this for me for my bro 🙃✨" },
+  { src: "mat1.jpeg", caption: "" },
+  { src: "p20.jpeg", caption: "" },
+  { src: "mehram.jpeg", caption: "AMEEENNN" },
+
+  { src: "p17.jpeg", caption: "Will you?? 🤧" },
+  { src: "nechlace.jpeg", caption: "I started kissing this pic everytime 😭👉🏻👈🏻" },
+  { src: "nechlece.jpeg", caption: "Jana you look so beautifullllll 😭🤌🏻💗" },
+  { src: "night 2.jpeg", caption: "" },
+  { src: "night.jpeg", caption: "" },
+  { src: "p1.jpeg", caption: "" },
+  { src: "r1.jpeg", caption: "" },
+  { src: "r4.jpeg", caption: "" },
+  { src: "r5.jpeg", caption: "" },
+  { src: "r6.jpeg", caption: "" },
+  { src: "r20.jpeg", caption: "" },
+  { src: "r21.jpeg", caption: "" },
+  { src: "r24.jpeg", caption: "" },
+  { src: "r27.jpeg", caption: "" },
+  { src: "r68.jpeg", caption: "" },
+  { src: "r432.jpeg", caption: "" },
+  { src: "r434.jpeg", caption: "" },
+  { src: "r452.jpeg", caption: "" },
+  { src: "r3213.jpeg", caption: "" },
+  { src: "r4324.jpeg", caption: "" },
+  
+  
+  
+];
+const MUSIC_SRC = "mysong.mp3"; // <-- put your mp3 file name here (or a URL)
+
+/* ================
+   End of user edits
+   ================ */
+
+/* Page elements */
+const pages = {
+  password: document.getElementById('page-password'),
+  timer: document.getElementById('page-timer'),
+  main: document.getElementById('page-main'),
+  gallery: document.getElementById('page-gallery'),
+  end: document.getElementById('page-end')
+};
+const passInput = document.getElementById('passInput');
+const checkPassBtn = document.getElementById('checkPassBtn');
+const hintBtn = document.getElementById('hintBtn');
+const passMsg = document.getElementById('passMsg');
+const timerLine = document.getElementById('timerLine');
+const refreshTimer = document.getElementById('refreshTimer');
+
+const noteArea = document.getElementById('noteArea');
+const toGallery = document.getElementById('toGallery');
+const backToMain = document.getElementById('backToMain');
+const toEnd = document.getElementById('toEnd');
+const restartBtn = document.getElementById('restartBtn');
+
+const galleryGrid = document.getElementById('galleryGrid');
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modalImg');
+const modalCaption = document.getElementById('modalCaption');
+const closeModal = document.getElementById('closeModal');
+
+const musicBtn = document.getElementById('musicBtn');
+const bgMusic = document.getElementById('bgMusic');
+
+const heartsLayer = document.getElementById('heartsLayer');
+
+/* initial setup */
+bgMusic.src = MUSIC_SRC; // set music source
+
+let unlockedByPassword = false;
+let timerFinished = false;
+
+/* show a page and hide others */
+function showPage(name){
+  for(const k in pages) pages[k].style.display = 'none';
+  pages[name].style.display = 'block';
+}
+
+/* password flow */
+checkPassBtn.addEventListener('click', tryPassword);
+passInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') tryPassword(); });
+hintBtn.addEventListener('click', ()=> {
+  passMsg.style.display = 'block';
+  passMsg.textContent = "Hint: " + HINT_TEXT;
+  setTimeout(()=>{ passMsg.style.display = 'none'; }, 6000);
+});
+
+function tryPassword(){
+  const val = passInput.value.trim();
+  if(val === SECRET_PASSWORD){
+    unlockedByPassword = true;
+    passMsg.style.display = 'block';
+    passMsg.style.color = '#2e7a5e';
+    passMsg.textContent = "Code accepted. Opening the countdown...";
+    setTimeout(()=>{ passMsg.style.display='none'; showPage('timer'); startTimer(); }, 900);
+  } else {
+    passMsg.style.display = 'block';
+    passMsg.style.color = '#b23a5a';
+    passMsg.textContent = "Bataya tha mane 😭. Try again ♥";
+    passInput.value = '';
+  }
+}
+
+/* Timer logic */
+let timerInterval = null;
+function startTimer(){
+  updateTimer(); // run once immediately
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer(){
+  const now = new Date();
+  const target = new Date(BIRTHDAY_ISO);
+  const diff = target - now;
+  if(diff <= 0){
+    timerFinished = true;
+    timerLine.textContent = "00 : 00 : 00 : 00";
+    clearInterval(timerInterval);
+    // allow enter to main page
+    setTimeout(()=>{ showPage('main'); populateMain(); }, 800);
+    return;
+  }
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+  const secs = Math.floor((diff % (1000*60)) / 1000);
+  timerLine.textContent = `${pad(days)} : ${pad(hours)} : ${pad(mins)} : ${pad(secs)}`;
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+refreshTimer.addEventListener('click', ()=> updateTimer());
+
+/* MAIN: populate the note content */
+function populateMain(){
+  // Block direct access: check both password and timer:
+  if(!unlockedByPassword || !timerFinished){
+    // If password was entered but timer not finished, show timer instead
+    if(unlockedByPassword && !timerFinished) { showPage('timer'); }
+    else showPage('password');
+    return;
+  }
+  showPage('main');
+  noteArea.innerHTML = '';
+  // insert NOTE_TEXT paragraphs
+  const parts = NOTE_TEXT.split(/\n{2,}/);
+  for(const p of parts){
+    const el = document.createElement('p');
+    el.textContent = p.trim();
+    noteArea.appendChild(el);
+  }
+}
+
+/* Heart pops while scrolling the note: */
+let lastScroll = 0;
+noteArea.addEventListener('scroll', ()=> {
+  const st = noteArea.scrollTop;
+  // Throttle: spawn hearts every ~150px scrolled
+  if(Math.abs(st - lastScroll) > 120){
+    spawnHearts(3);
+    lastScroll = st;
+  }
+});
+
+function spawnHearts(n=1){
+  for(let i=0;i<n;i++){
+    const el = document.createElement('div');
+    el.className = 'heart-pop';
+    el.style.left = Math.random()*90 + '%';
+    el.style.fontSize = (12 + Math.random()*28) + 'px';
+    el.style.color = ['#f67aa3','#f9b0c9','#e95f8d'][Math.floor(Math.random()*3)];
+    el.textContent = '💗✨';
+    heartsLayer.appendChild(el);
+    // remove after animation
+    setTimeout(()=> el.remove(), 3000 + Math.random()*800);
+  }
+}
+
+/* Gallery populate */
+function populateGallery(){
+  // check unlock
+  if(!unlockedByPassword || !timerFinished){
+    if(unlockedByPassword && !timerFinished) showPage('timer'); else showPage('password');
+    return;
+  }
+  galleryGrid.innerHTML = '';
+  GALLERY_IMAGES.forEach((g, idx)=>{
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+    item.dataset.idx = idx;
+    const img = document.createElement('img');
+    img.src = g.src;
+    img.alt = g.caption || ('Photo ' + (idx+1));
+    item.appendChild(img);
+    const cap = document.createElement('div');
+    cap.className = 'caption';
+    cap.textContent = g.caption || '';
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(item);
+    wrapper.appendChild(cap);
+    galleryGrid.appendChild(wrapper);
+
+    // click to open modal
+    item.addEventListener('click', ()=> openModal(idx));
+  });
+}
+
+/* modal open */
+function openModal(idx){
+  const g = GALLERY_IMAGES[idx];
+  modalImg.src = g.src;
+  modalCaption.textContent = g.caption || '';
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+}
+closeModal.addEventListener('click', closeTheModal);
+modal.addEventListener('click', (e)=>{ if(e.target === modal) closeTheModal(); });
+function closeTheModal(){
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden','true');
+}
+
+/* Navigation buttons */
+toGallery.addEventListener('click', ()=> {
+  if(!unlockedByPassword || !timerFinished){ populateMain(); return; }
+  populateGallery();
+  showPage('gallery');
+});
+backToMain.addEventListener('click', ()=> populateMain());
+toEnd.addEventListener('click', ()=> {
+  if(!unlockedByPassword || !timerFinished) { populateGallery(); return; }
+  showPage('end');
+});
+restartBtn.addEventListener('click', ()=> {
+  // allow re-start sequence: return to password page and clear input
+  passInput.value = '';
+  unlockedByPassword = false;
+  timerFinished = false;
+  showPage('password');
+});
+
+/* Music play/pause toggling */
+let musicPlaying = false;
+musicBtn.addEventListener('click', toggleMusic);
+bgMusic.addEventListener('ended', ()=> { musicPlaying=false; musicBtn.classList.remove('on'); });
+
+function toggleMusic(){
+  if(!bgMusic.src) {
+    alert('No audio source set. Edit MUSIC_SRC in the script at top of the file.');
+    return;
+  }
+  if(musicPlaying){
+    bgMusic.pause();
+    musicPlaying = false;
+    musicBtn.classList.remove('on');
+  } else {
+    bgMusic.play().catch(()=> {
+      // some browsers block autoplay; visually set on and user can play manually
+      musicPlaying = !bgMusic.paused;
+      musicBtn.classList.toggle('on', musicPlaying);
+    });
+    musicPlaying = true;
+    musicBtn.classList.add('on');
+  }
+}
+
+/* Prevent direct page access via URL hash: we simply keep single page app — show password first */
+showPage('password');
+
+/* After loading, check whether timer has already passed (for demo) */
+(function checkInitialTimerState(){
+  const now = new Date();
+  if(new Date(BIRTHDAY_ISO) - now <= 0){
+    // timer already passed — set flags so that after correct password she can go straight to main
+    timerFinished = true;
+  }
+})();
+
+/* small accessibility: allow keyboard ESC to close modal */
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && modal.style.display === 'flex') closeTheModal();
+});
+
+/* END */
+</script>
+</body>
+</html>
